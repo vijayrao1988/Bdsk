@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -11,6 +12,7 @@
         android:layout_alignBaseline="@+id/timeButton"
         android:layout_alignBottom="@+id/timeButton"
         android:layout_alignStart="@+id/highButton"
+        android:enabled="false"
         android:onClick="onSendTP"
         android:text="Send TP" />
 
@@ -50,6 +52,7 @@
         android:layout_alignBottom="@+id/midButton"
         android:layout_marginRight="21dp"
         android:layout_toLeftOf="@+id/midButton"
+        android:enabled="false"
         android:onClick="onLow"
         android:text="Low" />
 
@@ -57,8 +60,10 @@
         android:id="@+id/timeButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/msgTextView"
-        android:layout_alignEnd="@+id/connectButton"
+        android:layout_below="@+id/switch1"
+        android:layout_marginTop="22dp"
+        android:layout_toEndOf="@+id/lowButton"
+        android:enabled="false"
         android:onClick="onSetTime"
         android:text="Set Time" />
 
@@ -66,17 +71,54 @@
         android:id="@+id/batteryButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignStart="@+id/potsButton2"
-        android:layout_below="@+id/msgTextView"
+        android:layout_alignStart="@+id/flushButton"
+        android:layout_below="@+id/flushButton"
+        android:layout_marginTop="13dp"
+        android:enabled="false"
         android:onClick="onBattery"
         android:text="Battery" />
 
     <Button
-        android:id="@+id/potsButton2"
+        android:id="@+id/flushButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/msgTextView"
+        android:layout_alignBaseline="@+id/startButton"
+        android:layout_alignBottom="@+id/startButton"
+        android:layout_alignStart="@+id/potsButton"
+        android:enabled="false"
+        android:onClick="onFlush"
+        android:text="Flush" />
+
+    <Button
+        android:id="@+id/startButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/stopButton"
+        android:layout_alignBottom="@+id/stopButton"
+        android:layout_alignStart="@+id/timeButton"
+        android:enabled="false"
+        android:onClick="onStart"
+        android:text="Start" />
+
+    <Button
+        android:id="@+id/stopButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/timepointButton"
+        android:layout_below="@+id/timepointButton"
+        android:layout_marginTop="16dp"
+        android:enabled="false"
+        android:onClick="onStop"
+        android:text="Stop" />
+
+    <Button
+        android:id="@+id/potsButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/timeButton"
+        android:layout_alignBottom="@+id/timeButton"
         android:layout_alignStart="@+id/lowButton"
+        android:enabled="false"
         android:onClick="onSetPots"
         android:text="Set Pots" />
 
@@ -87,6 +129,7 @@
         android:layout_below="@+id/rectangle"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="21dp"
+        android:enabled="false"
         android:onClick="onMid"
         android:text="Mid" />
 
@@ -98,6 +141,7 @@
         android:layout_alignBottom="@+id/midButton"
         android:layout_marginLeft="28dp"
         android:layout_toRightOf="@+id/midButton"
+        android:enabled="false"
         android:onClick="onHigh"
         android:text="High" />
 
@@ -108,23 +152,26 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="26dp"
+        android:enabled="true"
         android:onClick="onConnect"
         android:text="Connect" />
 
     <Button
-        android:id="@+id/noiseButton"
+        android:id="@+id/pauseButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/connectButton"
-        android:layout_centerHorizontal="true"
-        android:onClick="onNoise"
-        android:text="Noise" />
+        android:layout_alignBaseline="@+id/connectButton"
+        android:layout_alignBottom="@+id/connectButton"
+        android:layout_alignStart="@+id/timepointButton"
+        android:enabled="false"
+        android:onClick="onPause"
+        android:text="Pause" />
 
     <TextView
         android:id="@+id/msgTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/noiseButton"
+        android:layout_above="@+id/pauseButton"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp"
         android:text="" />

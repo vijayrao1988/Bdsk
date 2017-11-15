@@ -34,8 +34,6 @@ import java.util.SimpleTimeZone;
 import java.util.TimeZone;
 import java.util.Timer;
 
-import static java.lang.System.currentTimeMillis;
-
 public class PeripheralControlActivity extends Activity {
     public static final String EXTRA_NAME = "name";
     public static final String EXTRA_ID = "id";
@@ -66,7 +64,7 @@ public class PeripheralControlActivity extends Activity {
         ((LinearLayout) this.findViewById(R.id.rectangle)).setVisibility(View.INVISIBLE);
 
         //disable the noise button
-        ((Button) PeripheralControlActivity.this.findViewById(R.id.noiseButton)).setEnabled(false);
+        ((Button) PeripheralControlActivity.this.findViewById(R.id.pauseButton)).setEnabled(false);
 
         //disable the LOW/MID/HIGH alert level selection buttons
         ((Button) this.findViewById(R.id.lowButton)).setEnabled(false);
@@ -161,38 +159,54 @@ public class PeripheralControlActivity extends Activity {
                 case BleAdapterService.GATT_SERVICES_DISCOVERED:
                     //validate services and if ok...
                     List<BluetoothGattService> slist = bluetooth_le_adapter.getSupportedGattServices();
-                    boolean link_loss_present = false;
-                    boolean immediate_alert_present = false;
-                    boolean tx_power_present = false;
-                    boolean proximity_monitoring_present = false;
+                    boolean time_point_service_present = false;
+                    boolean current_time_service_present = false;
+                    boolean pots_service_present = false;
+                    boolean battery_service_present = false;
+                    boolean valve_controller_service_present = false;
 
                     for (BluetoothGattService svc : slist) {
                         Log.d(Constants.TAG, "UUID=" + svc.getUuid().toString().toUpperCase() + "INSTANCE=" + svc.getInstanceId());
                         String serviceUuid = svc.getUuid().toString().toUpperCase();
-                        if (svc.getUuid().toString().equalsIgnoreCase(BleAdapterService.LINK_LOSS_SERVICE_UUID)) {
-                            link_loss_present = true;
+                        if (svc.getUuid().toString().equalsIgnoreCase(BleAdapterService.TIME_POINT_SERVICE_SERVICE_UUID)) {
+                            time_point_service_present = true;
                             continue;
                         }
-                        if (svc.getUuid().toString().equalsIgnoreCase(BleAdapterService.IMMEDIATE_ALERT_SERVICE_UUID)) {
-                            immediate_alert_present = true;
+                        if (svc.getUuid().toString().equalsIgnoreCase(BleAdapterService.CURRENT_TIME_SERVICE_SERVICE_UUID)) {
+                            current_time_service_present = true;
                             continue;
                         }
-                        if (svc.getUuid().toString().equalsIgnoreCase(BleAdapterService.TX_POWER_SERVICE_UUID)) {
-                            tx_power_present = true;
+                        if (svc.getUuid().toString().equalsIgnoreCase(BleAdapterService.POTS_SERVICE_SERVICE_UUID)) {
+                            pots_service_present = true;
+                            continue;
+                        }
+                        if (svc.getUuid().toString().equalsIgnoreCase(BleAdapterService.BATTERY_SERVICE_SERVICE_UUID)) {
+                            battery_service_present = true;
+                            continue;
+                        }
+                        if (svc.getUuid().toString().equalsIgnoreCase(BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID)) {
+                            valve_controller_service_present = true;
                             continue;
                         }
                     }
 
-                    if (link_loss_present && immediate_alert_present && tx_power_present) {
+                    if (time_point_service_present && current_time_service_present && pots_service_present && battery_service_present) {
                         showMsg("Device has expected services");
 
 
                         //enable the LOW/MID/HIGH alert level selection buttons
-                        ((Button) PeripheralControlActivity.this.findViewById(R.id.lowButton)).setEnabled(true);
-                        ((Button) PeripheralControlActivity.this.findViewById(R.id.midButton)).setEnabled(true);
-                        ((Button) PeripheralControlActivity.this.findViewById(R.id.highButton)).setEnabled(true);
+                        //((Button) PeripheralControlActivity.this.findViewById(R.id.lowButton)).setEnabled(true);
+                        //((Button) PeripheralControlActivity.this.findViewById(R.id.midButton)).setEnabled(true);
+                        //((Button) PeripheralControlActivity.this.findViewById(R.id.highButton)).setEnabled(true);
+                        ((Button) PeripheralControlActivity.this.findViewById(R.id.potsButton)).setEnabled(true);
+                        ((Button) PeripheralControlActivity.this.findViewById(R.id.timeButton)).setEnabled(true);
+                        ((Button) PeripheralControlActivity.this.findViewById(R.id.timepointButton)).setEnabled(true);
+                        ((Button) PeripheralControlActivity.this.findViewById(R.id.flushButton)).setEnabled(true);
+                        ((Button) PeripheralControlActivity.this.findViewById(R.id.startButton)).setEnabled(true);
+                        ((Button) PeripheralControlActivity.this.findViewById(R.id.stopButton)).setEnabled(true);
+                        ((Button) PeripheralControlActivity.this.findViewById(R.id.batteryButton)).setEnabled(true);
+                        ((Button) PeripheralControlActivity.this.findViewById(R.id.pauseButton)).setEnabled(true);
 
-                        bluetooth_le_adapter.readCharacteristic(BleAdapterService.LINK_LOSS_SERVICE_UUID, BleAdapterService.ALERT_LEVEL_CHARACTERISTIC);
                     } else {
                         showMsg("Device does not have expected GATT services");
                     }
@@ -295,6 +309,38 @@ public class PeripheralControlActivity extends Activity {
         bluetooth_le_adapter.writeCharacteristic(
                 BleAdapterService.POTS_SERVICE_SERVICE_UUID,
                 BleAdapterService.POTS_CHARACTERISTIC_UUID, pots
+        );
+    }
+
+    public void onFlush(View view) {
+        byte[] valveCommand = {1};
+        bluetooth_le_adapter.writeCharacteristic(
+                BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID,
+                BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
+        );
+    }
+
+    public void onStart(View view) {
+        byte[] valveCommand = {2};
+        bluetooth_le_adapter.writeCharacteristic(
+                BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID,
+                BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
+        );
+    }
+
+    public void onStop(View view) {
+        byte[] valveCommand = {3};
+        bluetooth_le_adapter.writeCharacteristic(
+                BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID,
+                BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
+        );
+    }
+
+    public void onPause(View view) {
+        byte[] valveCommand = {4};
+        bluetooth_le_adapter.writeCharacteristic(
+                BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID,
+                BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
         );
     }
 
