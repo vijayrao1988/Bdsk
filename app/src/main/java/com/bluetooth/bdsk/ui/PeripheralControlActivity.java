@@ -271,19 +271,21 @@ public class PeripheralControlActivity extends Activity {
         Date trialTime = new Date();
         calendar.setTime(trialTime);
 
-        /*byte hours = (byte) calendar.get(Calendar.HOUR);
+        //Set present time as data packet
+        byte hours = (byte) calendar.get(Calendar.HOUR);
+        if(calendar.get(Calendar.AM_PM) == 1)
+        {hours = (byte) (calendar.get(Calendar.HOUR) + 12);}
         byte minutes = (byte) calendar.get(Calendar.MINUTE);
         byte seconds = (byte) calendar.get(Calendar.SECOND);
         byte DATE = (byte) calendar.get(Calendar.DAY_OF_MONTH);
         byte MONTH = (byte) (calendar.get(Calendar.MONTH)+1);
         int iYEARMSB = (calendar.get(Calendar.YEAR) / 256);
         int iYEARLSB = (calendar.get(Calendar.YEAR) % 256);
-        //byte bYEARMSB = (byte) iYEARMSB;
-        //byte bYEARLSB = (byte) iYEARLSB;
         byte bYEARMSB = (byte) iYEARMSB;
-        byte bYEARLSB = (byte) iYEARLSB;*/
+        byte bYEARLSB = (byte) iYEARLSB;
 
-        byte hours = (byte) 1;
+        //Set 1,2,3,4,5,6,7 as data packet
+        /*byte hours = (byte) 1;
         byte minutes = (byte) 2;
         byte seconds = (byte) 3;
         byte DATE = (byte) 4;
@@ -293,7 +295,7 @@ public class PeripheralControlActivity extends Activity {
         //byte bYEARMSB = (byte) iYEARMSB;
         //byte bYEARLSB = (byte) iYEARLSB;
         byte bYEARMSB = (byte) 6;
-        byte bYEARLSB = (byte) 7;
+        byte bYEARLSB = (byte) 7;*/
 
         byte[] currentTime = {hours, minutes, seconds, DATE, MONTH, bYEARMSB, bYEARLSB};
 
@@ -345,16 +347,44 @@ public class PeripheralControlActivity extends Activity {
     }
 
     public void onSendTP(View view) {
-        byte hours = (byte) 1;
+
+        /*byte hours = (byte) 1;
         byte minutes = (byte) 2;
         byte seconds = (byte) 3;
         byte dayOfTheWeek = (byte) 4;
         byte durationMsb = (byte) 5;
         byte durationLsb = (byte) 6;
         byte volumeMsb = (byte) 7;
-        byte volumeLsb = (byte) 8;
+        byte volumeLsb = (byte) 8;*/
 
-        byte[] timePoint = {hours, minutes, seconds, dayOfTheWeek, durationMsb, durationLsb, volumeMsb, volumeLsb};
+        String[] ids = TimeZone.getAvailableIDs(+5 * 60 * 60 * 1000);
+        SimpleTimeZone pdt = new SimpleTimeZone(+5 * 60 * 60 * 1000, ids[0]);
+
+        Calendar calendar = new GregorianCalendar(pdt);
+        Date trialTime = new Date();
+        calendar.setTime(trialTime);
+        calendar.add(12, 2);
+
+        //Set present time as data packet
+        byte index = (byte) 1;
+        byte dayOfTheWeek = (byte) calendar.get(Calendar.DAY_OF_WEEK);
+        byte hours = (byte) calendar.get(Calendar.HOUR);
+        if(calendar.get(Calendar.AM_PM) == 1)
+        {hours = (byte) (calendar.get(Calendar.HOUR) + 12);}
+        byte minutes = (byte) calendar.get(Calendar.MINUTE);
+        byte seconds = (byte) calendar.get(Calendar.SECOND);
+        int duration = 5;
+        int volume = 5;
+        int iDurationMSB = (duration / 256);
+        int iDurationLSB = (duration % 256);
+        byte bDurationMSB = (byte) iDurationMSB;
+        byte bDurationLSB = (byte) iDurationLSB;
+        int iVolumeMSB = (volume / 256);
+        int iVolumeLSB = (volume % 256);
+        byte bVolumeMSB = (byte) iVolumeMSB;
+        byte bVolumeLSB = (byte) iVolumeLSB;
+
+        byte[] timePoint = {index, dayOfTheWeek, hours, minutes, seconds, bDurationMSB, bDurationLSB, bVolumeMSB, bVolumeLSB};
         bluetooth_le_adapter.writeCharacteristic(
                 BleAdapterService.TIME_POINT_SERVICE_SERVICE_UUID,
                 BleAdapterService.NEW_WATERING_TIME_POINT_CHARACTERISTIC_UUID, timePoint

@@ -68,9 +68,6 @@ public class BleAdapterService extends Service {
     public static final String TIME_POINT_SERVICE_SERVICE_UUID = "6E52214F-B56F-4B05-8465-A1CEE41BB141";
     public static final String VALVE_CONTROLLER_SERVICE_UUID = "6E52C714-B56F-4B05-8465-A1CEE41BB141";
 
-
-
-
     //service characteristics
     public static String ALERT_LEVEL_CHARACTERISTIC = "00002A06-0000-1000-8000-00805F9B34FB";
     public static String CLIENT_PROXIMITY_CHARACTERISTIC = "3E099911-293F-11E4-93BD-AFD0FE6D1DFD";
