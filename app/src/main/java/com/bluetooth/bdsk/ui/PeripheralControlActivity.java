@@ -34,6 +34,8 @@ import java.util.SimpleTimeZone;
 import java.util.TimeZone;
 import java.util.Timer;
 
+import static java.lang.Boolean.TRUE;
+
 public class PeripheralControlActivity extends Activity {
     public static final String EXTRA_NAME = "name";
     public static final String EXTRA_ID = "id";
@@ -48,6 +50,7 @@ public class PeripheralControlActivity extends Activity {
     private boolean back_requested = false;
     private boolean share_with_server = false;
     private Switch share_switch;
+    private int CommListIndex = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -215,13 +218,14 @@ public class PeripheralControlActivity extends Activity {
                 case BleAdapterService.GATT_CHARACTERISTIC_READ:
                     bundle = msg.getData();
                     Log.d(Constants.TAG, "Service=" + bundle.get(BleAdapterService.PARCEL_SERVICE_UUID).toString().toUpperCase() + " Characteristic=" + bundle.get(BleAdapterService.PARCEL_CHARACTERISTIC_UUID).toString().toUpperCase());
-                    if(bundle.get(BleAdapterService.PARCEL_CHARACTERISTIC_UUID).toString()
-                            .toUpperCase().equals(BleAdapterService.ALERT_LEVEL_CHARACTERISTIC)
-                            && bundle.get(BleAdapterService.PARCEL_SERVICE_UUID).toString().toUpperCase().equals(BleAdapterService.BATTERY_LEVEL_CHARACTERISTIC_UUID)) {
+                    if(bundle.get(BleAdapterService.PARCEL_CHARACTERISTIC_UUID).toString().toUpperCase().equals(BleAdapterService.BATTERY_LEVEL_CHARACTERISTIC_UUID)) {
                         b = bundle.getByteArray(BleAdapterService.PARCEL_VALUE);
                         if(b.length > 0) {
                             PeripheralControlActivity.this.setAlertLevel((int) b[0]);
                             showMsg("Received " + b.toString() + "from Pebble.");
+                            showMsg("Battery characteristic non-empty = " + (int)b[0]);
+                        } else {
+                            showMsg("Battery characteristic empty");
                         }
                     }
 
@@ -235,6 +239,22 @@ public class PeripheralControlActivity extends Activity {
                         b = bundle.getByteArray(BleAdapterService.PARCEL_VALUE);
                         if (b.length > 0) {
                             PeripheralControlActivity.this.setAlertLevel((int) b[0]);
+                        }
+                    }
+                    if (bundle.get(BleAdapterService.PARCEL_CHARACTERISTIC_UUID).toString()
+                            .toUpperCase().equals(BleAdapterService.NEW_WATERING_TIME_POINT_CHARACTERISTIC_UUID)) {
+                        b = bundle.getByteArray(BleAdapterService.PARCEL_VALUE);
+                        if (b.length > 0) {
+                            showMsg("Received ack");
+                            CommListIndex++;
+                            if(CommListIndex < 28) {
+                                onSendTPDynamic();
+                            }
+                            else
+                            {
+                                CommListIndex = 0;
+
+                            }
                         }
                     }
                     break;
@@ -391,13 +411,62 @@ public class PeripheralControlActivity extends Activity {
         );
     }
 
+    public void onSendTPDynamic() {
+
+        /*byte hours = (byte) 1;
+        byte minutes = (byte) 2;
+        byte seconds = (byte) 3;
+        byte dayOfTheWeek = (byte) 4;
+        byte durationMsb = (byte) 5;
+        byte durationLsb = (byte) 6;
+        byte volumeMsb = (byte) 7;
+        byte volumeLsb = (byte) 8;*/
+
+        String[] ids = TimeZone.getAvailableIDs(+5 * 60 * 60 * 1000);
+        SimpleTimeZone pdt = new SimpleTimeZone(+5 * 60 * 60 * 1000, ids[0]);
+
+        Calendar calendar = new GregorianCalendar(pdt);
+        Date trialTime = new Date();
+        calendar.setTime(trialTime);
+        calendar.add(12, 2);
+
+        //Set present time as data packet
+        byte index = (byte) 1;
+        byte dayOfTheWeek = (byte) calendar.get(Calendar.DAY_OF_WEEK);
+        byte hours = (byte) calendar.get(Calendar.HOUR);
+        if(calendar.get(Calendar.AM_PM) == 1)
+        {hours = (byte) (calendar.get(Calendar.HOUR) + 12);}
+        byte minutes = (byte) calendar.get(Calendar.MINUTE);
+        byte seconds = (byte) calendar.get(Calendar.SECOND);
+        int duration = 5;
+        int volume = 5;
+        int iDurationMSB = (duration / 256);
+        int iDurationLSB = (duration % 256);
+        byte bDurationMSB = (byte) iDurationMSB;
+        byte bDurationLSB = (byte) iDurationLSB;
+        int iVolumeMSB = (volume / 256);
+        int iVolumeLSB = (volume % 256);
+        byte bVolumeMSB = (byte) iVolumeMSB;
+        byte bVolumeLSB = (byte) iVolumeLSB;
+
+        byte[] timePoint = {index, dayOfTheWeek, hours, minutes, seconds, bDurationMSB, bDurationLSB, bVolumeMSB, bVolumeLSB};
+        bluetooth_le_adapter.writeCharacteristic(
+                BleAdapterService.TIME_POINT_SERVICE_SERVICE_UUID,
+                BleAdapterService.NEW_WATERING_TIME_POINT_CHARACTERISTIC_UUID, timePoint
+        );
+    }
+
     public void onBattery(View view) {
-
-
-        bluetooth_le_adapter.readCharacteristic(
+        if(bluetooth_le_adapter.readCharacteristic(
                 BleAdapterService.BATTERY_SERVICE_SERVICE_UUID,
                 BleAdapterService.BATTERY_LEVEL_CHARACTERISTIC_UUID
-        );
+        ) == TRUE) {
+            showMsg("Battery Level Read");
+
+        } else {
+            showMsg("Reading Battery Level failed");
+        }
+        ;
     }
 
     public void onNoise(View view) {

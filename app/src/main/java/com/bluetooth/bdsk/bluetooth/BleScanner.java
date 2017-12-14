@@ -70,8 +70,8 @@ public class BleScanner {
         List<ScanFilter> filters;
 
         filters = new ArrayList<ScanFilter>();
-        ScanFilter filter = new ScanFilter.Builder().setDeviceName("Pebble").build();
-        filters.add(filter);
+        //ScanFilter filter = new ScanFilter.Builder().setDeviceName("Pebble").build();
+        //filters.add(filter);
 
         ScanSettings settings = new ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build();
         setScanning(true);
