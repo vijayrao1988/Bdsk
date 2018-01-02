@@ -50,7 +50,7 @@ public class PeripheralControlActivity extends Activity {
     private boolean back_requested = false;
     private boolean share_with_server = false;
     private Switch share_switch;
-    private int CommListIndex = 0;
+    private static volatile int CommListIndex = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -204,7 +204,8 @@ public class PeripheralControlActivity extends Activity {
                         ((Button) PeripheralControlActivity.this.findViewById(R.id.potsButton)).setEnabled(true);
                         ((Button) PeripheralControlActivity.this.findViewById(R.id.timeButton)).setEnabled(true);
                         ((Button) PeripheralControlActivity.this.findViewById(R.id.timepointButton)).setEnabled(true);
-                        ((Button) PeripheralControlActivity.this.findViewById(R.id.flushButton)).setEnabled(true);
+                        ((Button) PeripheralControlActivity.this.findViewById(R.id.flushOpen)).setEnabled(true);
+                        ((Button) PeripheralControlActivity.this.findViewById(R.id.flushClose)).setEnabled(true);
                         ((Button) PeripheralControlActivity.this.findViewById(R.id.startButton)).setEnabled(true);
                         ((Button) PeripheralControlActivity.this.findViewById(R.id.stopButton)).setEnabled(true);
                         ((Button) PeripheralControlActivity.this.findViewById(R.id.batteryButton)).setEnabled(true);
@@ -284,23 +285,16 @@ public class PeripheralControlActivity extends Activity {
     }
 
     public void onSetTime(View view) {
-        String[] ids = TimeZone.getAvailableIDs(+5 * 60 * 60 * 1000);
-        SimpleTimeZone pdt = new SimpleTimeZone(+5 * 60 * 60 * 1000, ids[0]);
-
-        Calendar calendar = new GregorianCalendar(pdt);
-        Date trialTime = new Date();
-        calendar.setTime(trialTime);
+        Calendar calendar = Calendar.getInstance();
 
         //Set present time as data packet
-        byte hours = (byte) calendar.get(Calendar.HOUR);
-        if(calendar.get(Calendar.AM_PM) == 1)
-        {hours = (byte) (calendar.get(Calendar.HOUR) + 12);}
+        byte hours = (byte) calendar.get(Calendar.HOUR_OF_DAY);
         byte minutes = (byte) calendar.get(Calendar.MINUTE);
         byte seconds = (byte) calendar.get(Calendar.SECOND);
         byte DATE = (byte) calendar.get(Calendar.DAY_OF_MONTH);
-        byte MONTH = (byte) (calendar.get(Calendar.MONTH)+1);
-        int iYEARMSB = (calendar.get(Calendar.YEAR) / 256);
-        int iYEARLSB = (calendar.get(Calendar.YEAR) % 256);
+        byte MONTH = (byte) ((calendar.get(Calendar.MONTH)) + 1);
+        int iYEARMSB = (calendar.get(Calendar.YEAR) / 128);
+        int iYEARLSB = (calendar.get(Calendar.YEAR) % 128);
         byte bYEARMSB = (byte) iYEARMSB;
         byte bYEARLSB = (byte) iYEARLSB;
 
@@ -334,8 +328,16 @@ public class PeripheralControlActivity extends Activity {
         );
     }
 
-    public void onFlush(View view) {
+    public void onFlushOpen(View view) {
         byte[] valveCommand = {1};
+        bluetooth_le_adapter.writeCharacteristic(
+                BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID,
+                BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
+        );
+    }
+
+    public void onFlushClose(View view) {
+        byte[] valveCommand = {5};
         bluetooth_le_adapter.writeCharacteristic(
                 BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID,
                 BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
@@ -377,30 +379,26 @@ public class PeripheralControlActivity extends Activity {
         byte volumeMsb = (byte) 7;
         byte volumeLsb = (byte) 8;*/
 
-        String[] ids = TimeZone.getAvailableIDs(+5 * 60 * 60 * 1000);
-        SimpleTimeZone pdt = new SimpleTimeZone(+5 * 60 * 60 * 1000, ids[0]);
-
-        Calendar calendar = new GregorianCalendar(pdt);
-        Date trialTime = new Date();
-        calendar.setTime(trialTime);
-        calendar.add(12, 2);
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MINUTE, 2);
 
         //Set present time as data packet
-        byte index = (byte) 1;
+        byte index = (byte) CommListIndex;
         byte dayOfTheWeek = (byte) calendar.get(Calendar.DAY_OF_WEEK);
         byte hours = (byte) calendar.get(Calendar.HOUR);
         if(calendar.get(Calendar.AM_PM) == 1)
         {hours = (byte) (calendar.get(Calendar.HOUR) + 12);}
+        else {hours = (byte) (calendar.get(Calendar.HOUR));}
         byte minutes = (byte) calendar.get(Calendar.MINUTE);
         byte seconds = (byte) calendar.get(Calendar.SECOND);
-        int duration = 5;
-        int volume = 5;
-        int iDurationMSB = (duration / 256);
-        int iDurationLSB = (duration % 256);
+        int duration = 555;
+        int volume = 555;
+        int iDurationMSB = (duration / 128);
+        int iDurationLSB = (duration % 128);
         byte bDurationMSB = (byte) iDurationMSB;
         byte bDurationLSB = (byte) iDurationLSB;
-        int iVolumeMSB = (volume / 256);
-        int iVolumeLSB = (volume % 256);
+        int iVolumeMSB = (volume / 128);
+        int iVolumeLSB = (volume % 128);
         byte bVolumeMSB = (byte) iVolumeMSB;
         byte bVolumeLSB = (byte) iVolumeLSB;
 
@@ -422,30 +420,23 @@ public class PeripheralControlActivity extends Activity {
         byte volumeMsb = (byte) 7;
         byte volumeLsb = (byte) 8;*/
 
-        String[] ids = TimeZone.getAvailableIDs(+5 * 60 * 60 * 1000);
-        SimpleTimeZone pdt = new SimpleTimeZone(+5 * 60 * 60 * 1000, ids[0]);
-
-        Calendar calendar = new GregorianCalendar(pdt);
-        Date trialTime = new Date();
-        calendar.setTime(trialTime);
-        calendar.add(12, 2);
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MINUTE, 2);
 
         //Set present time as data packet
-        byte index = (byte) 1;
+        byte index = (byte) CommListIndex;
         byte dayOfTheWeek = (byte) calendar.get(Calendar.DAY_OF_WEEK);
-        byte hours = (byte) calendar.get(Calendar.HOUR);
-        if(calendar.get(Calendar.AM_PM) == 1)
-        {hours = (byte) (calendar.get(Calendar.HOUR) + 12);}
+        byte hours = (byte) calendar.get(Calendar.HOUR_OF_DAY);
         byte minutes = (byte) calendar.get(Calendar.MINUTE);
         byte seconds = (byte) calendar.get(Calendar.SECOND);
-        int duration = 5;
-        int volume = 5;
-        int iDurationMSB = (duration / 256);
-        int iDurationLSB = (duration % 256);
+        int duration = 555 + CommListIndex;
+        int volume = 555 - CommListIndex;
+        int iDurationMSB = (duration / 128);
+        int iDurationLSB = (duration % 128);
         byte bDurationMSB = (byte) iDurationMSB;
         byte bDurationLSB = (byte) iDurationLSB;
-        int iVolumeMSB = (volume / 256);
-        int iVolumeLSB = (volume % 256);
+        int iVolumeMSB = (volume / 128);
+        int iVolumeLSB = (volume % 128);
         byte bVolumeMSB = (byte) iVolumeMSB;
         byte bVolumeLSB = (byte) iVolumeLSB;
 

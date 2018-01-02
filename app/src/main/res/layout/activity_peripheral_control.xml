@@ -71,31 +71,38 @@
         android:id="@+id/batteryButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignStart="@+id/flushButton"
-        android:layout_below="@+id/flushButton"
-        android:layout_marginTop="13dp"
+        android:layout_alignEnd="@+id/potsButton"
+        android:layout_below="@+id/flushClose"
         android:enabled="false"
         android:onClick="onBattery"
         android:text="Battery" />
 
     <Button
-        android:id="@+id/flushButton"
+        android:id="@+id/flushClose"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/startButton"
-        android:layout_alignBottom="@+id/startButton"
-        android:layout_alignStart="@+id/potsButton"
+        android:layout_alignStart="@+id/batteryButton"
+        android:layout_below="@+id/flushOpen"
         android:enabled="false"
-        android:onClick="onFlush"
-        android:text="Flush" />
+        android:onClick="onFlushClose"
+        android:text="FlushClose" />
+
+    <Button
+        android:id="@+id/flushOpen"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/potsButton"
+        android:layout_below="@+id/potsButton"
+        android:enabled="false"
+        android:onClick="onFlushOpen"
+        android:text="FlushOpen" />
 
     <Button
         android:id="@+id/startButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/stopButton"
-        android:layout_alignBottom="@+id/stopButton"
         android:layout_alignStart="@+id/timeButton"
+        android:layout_below="@+id/timeButton"
         android:enabled="false"
         android:onClick="onStart"
         android:text="Start" />
@@ -106,7 +113,6 @@
         android:layout_height="wrap_content"
         android:layout_alignStart="@+id/timepointButton"
         android:layout_below="@+id/timepointButton"
-        android:layout_marginTop="16dp"
         android:enabled="false"
         android:onClick="onStop"
         android:text="Stop" />
@@ -149,9 +155,8 @@
         android:id="@+id/connectButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="26dp"
+        android:layout_alignEnd="@+id/startButton"
+        android:layout_below="@+id/startButton"
         android:enabled="true"
         android:onClick="onConnect"
         android:text="Connect" />
