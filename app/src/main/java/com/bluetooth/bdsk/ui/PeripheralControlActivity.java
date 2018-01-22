@@ -18,9 +18,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bluetooth.bdsk.Constants;
 import com.bluetooth.bdsk.R;
@@ -52,6 +54,10 @@ public class PeripheralControlActivity extends Activity {
     private Switch share_switch;
     private static volatile int CommListIndex = 0;
 
+    private EditText calibrationValue;
+    private int countValueInt=0;
+    private TextView countTime;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,6 +67,8 @@ public class PeripheralControlActivity extends Activity {
         final Intent intent = getIntent();
         device_name = intent.getStringExtra(EXTRA_NAME);
         device_address = intent.getStringExtra(EXTRA_ID);
+        calibrationValue = (EditText)findViewById(R.id.calibration);
+        countTime = (TextView)findViewById(R.id.rssiTextView);
 
         //show the device name
         ((TextView) this.findViewById(R.id.nameTextView)).setText("Device : "+device_name+"["+device_address+"]"); //hid the coloured rectangle used to show green/amber/red rssi distance
@@ -74,6 +82,10 @@ public class PeripheralControlActivity extends Activity {
         ((Button) this.findViewById(R.id.midButton)).setEnabled(false);
         ((Button) this.findViewById(R.id.highButton)).setEnabled(false);
 
+        //Calibration code
+        ((EditText)this.findViewById(R.id.calibration)).setEnabled(false);
+        ((Button) this.findViewById(R.id.calibrateButton)).setEnabled(false);
+
         share_switch = (Switch) this.findViewById(R.id.switch1);
         share_switch.setEnabled(false);
         share_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -81,6 +93,7 @@ public class PeripheralControlActivity extends Activity {
                 // we'll complete this later
             }
         });
+
 
         // connect to the Bluetooth adapter service
         Intent gattServiceIntent = new Intent(this, BleAdapterService.class);
@@ -193,7 +206,7 @@ public class PeripheralControlActivity extends Activity {
                         }
                     }
 
-                    if (time_point_service_present && current_time_service_present && pots_service_present && battery_service_present) {
+                    if (time_point_service_present && current_time_service_present && pots_service_present && battery_service_present && valve_controller_service_present) {
                         showMsg("Device has expected services");
 
 
@@ -210,6 +223,10 @@ public class PeripheralControlActivity extends Activity {
                         ((Button) PeripheralControlActivity.this.findViewById(R.id.stopButton)).setEnabled(true);
                         ((Button) PeripheralControlActivity.this.findViewById(R.id.batteryButton)).setEnabled(true);
                         ((Button) PeripheralControlActivity.this.findViewById(R.id.pauseButton)).setEnabled(true);
+                        ((EditText)PeripheralControlActivity.this.findViewById(R.id.calibration)).setEnabled(true);
+                        ((Button)PeripheralControlActivity.this.findViewById(R.id.calibrateButton)).setEnabled(true);
+
+
 
                     } else {
                         showMsg("Device does not have expected GATT services");
@@ -225,6 +242,7 @@ public class PeripheralControlActivity extends Activity {
                             PeripheralControlActivity.this.setAlertLevel((int) b[0]);
                             showMsg("Received " + b.toString() + "from Pebble.");
                             showMsg("Battery characteristic non-empty = " + (int)b[0]);
+                            countTime.setText("Count Time = "+b.toString());
                         } else {
                             showMsg("Battery characteristic empty");
                         }
@@ -329,7 +347,7 @@ public class PeripheralControlActivity extends Activity {
     }
 
     public void onFlushOpen(View view) {
-        byte[] valveCommand = {1};
+        byte[] valveCommand = {1,0,0};
         bluetooth_le_adapter.writeCharacteristic(
                 BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID,
                 BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
@@ -337,7 +355,7 @@ public class PeripheralControlActivity extends Activity {
     }
 
     public void onFlushClose(View view) {
-        byte[] valveCommand = {5};
+        byte[] valveCommand = {5,0,0};
         bluetooth_le_adapter.writeCharacteristic(
                 BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID,
                 BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
@@ -345,7 +363,7 @@ public class PeripheralControlActivity extends Activity {
     }
 
     public void onStart(View view) {
-        byte[] valveCommand = {2};
+        byte[] valveCommand = {2,0,0};
         bluetooth_le_adapter.writeCharacteristic(
                 BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID,
                 BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
@@ -353,7 +371,7 @@ public class PeripheralControlActivity extends Activity {
     }
 
     public void onStop(View view) {
-        byte[] valveCommand = {3};
+        byte[] valveCommand = {3,0,0};
         bluetooth_le_adapter.writeCharacteristic(
                 BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID,
                 BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
@@ -361,11 +379,31 @@ public class PeripheralControlActivity extends Activity {
     }
 
     public void onPause(View view) {
-        byte[] valveCommand = {4};
+        byte[] valveCommand = {4,0,0};
         bluetooth_le_adapter.writeCharacteristic(
                 BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID,
                 BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
         );
+    }
+
+    public void onCalibrate(View view) {
+        String countValue = calibrationValue.getText().toString();
+        if(!(countValue.isEmpty()))
+        {
+            countValueInt = Integer.parseInt(countValue);
+            int icountMSB = countValueInt / 128;
+            int icountLSB = countValueInt % 128;
+            byte bcountMSB = (byte) icountMSB;
+            byte bcountLSB = (byte) icountLSB;
+
+            byte[] valveCommand = {6, bcountMSB, bcountLSB};
+            bluetooth_le_adapter.writeCharacteristic(
+                    BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID,
+                    BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
+            );
+        }
+        else
+            Toast.makeText(this, "Please enter count value", Toast.LENGTH_SHORT).show();
     }
 
     public void onSendTP(View view) {

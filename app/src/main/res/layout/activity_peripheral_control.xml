@@ -3,7 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context=".ui.PeripheralControlActivity">
 
     <Button
         android:id="@+id/timepointButton"
@@ -33,6 +34,23 @@
         android:layout_margin="16dp"
         android:text="RSSI"/>
 
+    <EditText
+        android:id="@+id/calibration"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_below="@+id/rssiTextView"
+        android:layout_marginTop="21dp"
+        android:hint="Enter calibration count value"
+        android:inputType="text"/>
+    <Button
+        android:id="@+id/calibrateButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/calibration"
+        android:text="Calibrate"
+        android:onClick="onCalibrate" />
+
+
     <LinearLayout
         android:id="@+id/rectangle"
         android:layout_width="200dp"
@@ -44,12 +62,13 @@
         android:orientation="vertical"
         android:padding="10dp">
     </LinearLayout>
-
     <Button
         android:id="@+id/lowButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/calibrateButton"
         android:layout_alignBottom="@+id/midButton"
+        android:layout_alignTop="@+id/midButton"
         android:layout_marginRight="21dp"
         android:layout_toLeftOf="@+id/midButton"
         android:enabled="false"
@@ -61,7 +80,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/switch1"
-        android:layout_marginTop="22dp"
+        android:layout_marginTop="10dp"
         android:layout_toEndOf="@+id/lowButton"
         android:enabled="false"
         android:onClick="onSetTime"
@@ -132,7 +151,7 @@
         android:id="@+id/midButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/rectangle"
+        android:layout_below="@+id/calibrateButton"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="21dp"
         android:enabled="false"
@@ -143,6 +162,7 @@
         android:id="@+id/highButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/calibrateButton"
         android:layout_alignBaseline="@+id/midButton"
         android:layout_alignBottom="@+id/midButton"
         android:layout_marginLeft="28dp"
@@ -188,7 +208,7 @@
         android:layout_alignLeft="@+id/rectangle"
         android:layout_alignRight="@+id/rectangle"
         android:layout_below="@+id/lowButton"
-        android:layout_marginTop="26dp"
+        android:layout_marginTop="10dp"
         android:text="Share" />
 
 </RelativeLayout>
