@@ -210,6 +210,7 @@ public class PeripheralControlActivity extends Activity {
                         ((Button) PeripheralControlActivity.this.findViewById(R.id.stopButton)).setEnabled(true);
                         ((Button) PeripheralControlActivity.this.findViewById(R.id.batteryButton)).setEnabled(true);
                         ((Button) PeripheralControlActivity.this.findViewById(R.id.pauseButton)).setEnabled(true);
+                        ((Button) PeripheralControlActivity.this.findViewById(R.id.logButton)).setEnabled(true);
 
                     } else {
                         showMsg("Device does not have expected GATT services");
@@ -225,6 +226,16 @@ public class PeripheralControlActivity extends Activity {
                             PeripheralControlActivity.this.setAlertLevel((int) b[0]);
                             showMsg("Received " + b.toString() + "from Pebble.");
                             showMsg("Battery characteristic non-empty = " + (int)b[0]);
+                        } else {
+                            showMsg("Battery characteristic empty");
+                        }
+                    }
+                    if(bundle.get(BleAdapterService.PARCEL_CHARACTERISTIC_UUID).toString().toUpperCase().equals(BleAdapterService.LOG_CHARACTERISTIC_UUID)) {
+                        b = bundle.getByteArray(BleAdapterService.PARCEL_VALUE);
+                        if(b.length > 0) {
+                            PeripheralControlActivity.this.setAlertLevel((int) b[0]);
+                            showMsg("Received " + b.toString() + "from Pebble.");
+                            showMsg("Log data = " + (int)b[0]);
                         } else {
                             showMsg("Battery characteristic empty");
                         }
@@ -293,8 +304,8 @@ public class PeripheralControlActivity extends Activity {
         byte seconds = (byte) calendar.get(Calendar.SECOND);
         byte DATE = (byte) calendar.get(Calendar.DAY_OF_MONTH);
         byte MONTH = (byte) ((calendar.get(Calendar.MONTH)) + 1);
-        int iYEARMSB = (calendar.get(Calendar.YEAR) / 128);
-        int iYEARLSB = (calendar.get(Calendar.YEAR) % 128);
+        int iYEARMSB = (calendar.get(Calendar.YEAR) / 256);
+        int iYEARLSB = (calendar.get(Calendar.YEAR) % 256);
         byte bYEARMSB = (byte) iYEARMSB;
         byte bYEARLSB = (byte) iYEARLSB;
 
@@ -393,12 +404,12 @@ public class PeripheralControlActivity extends Activity {
         byte seconds = (byte) calendar.get(Calendar.SECOND);
         int duration = 555;
         int volume = 555;
-        int iDurationMSB = (duration / 128);
-        int iDurationLSB = (duration % 128);
+        int iDurationMSB = (duration / 256);
+        int iDurationLSB = (duration % 256);
         byte bDurationMSB = (byte) iDurationMSB;
         byte bDurationLSB = (byte) iDurationLSB;
-        int iVolumeMSB = (volume / 128);
-        int iVolumeLSB = (volume % 128);
+        int iVolumeMSB = (volume / 256);
+        int iVolumeLSB = (volume % 256);
         byte bVolumeMSB = (byte) iVolumeMSB;
         byte bVolumeLSB = (byte) iVolumeLSB;
 
@@ -431,12 +442,12 @@ public class PeripheralControlActivity extends Activity {
         byte seconds = (byte) calendar.get(Calendar.SECOND);
         int duration = 555 + CommListIndex;
         int volume = 555 - CommListIndex;
-        int iDurationMSB = (duration / 128);
-        int iDurationLSB = (duration % 128);
+        int iDurationMSB = (duration / 256);
+        int iDurationLSB = (duration % 256);
         byte bDurationMSB = (byte) iDurationMSB;
         byte bDurationLSB = (byte) iDurationLSB;
-        int iVolumeMSB = (volume / 128);
-        int iVolumeLSB = (volume % 128);
+        int iVolumeMSB = (volume / 256);
+        int iVolumeLSB = (volume % 256);
         byte bVolumeMSB = (byte) iVolumeMSB;
         byte bVolumeLSB = (byte) iVolumeLSB;
 
@@ -448,6 +459,19 @@ public class PeripheralControlActivity extends Activity {
     }
 
     public void onBattery(View view) {
+        if(bluetooth_le_adapter.readCharacteristic(
+                BleAdapterService.BATTERY_SERVICE_SERVICE_UUID,
+                BleAdapterService.BATTERY_LEVEL_CHARACTERISTIC_UUID
+        ) == TRUE) {
+            showMsg("Battery Level Read");
+
+        } else {
+            showMsg("Reading Battery Level failed");
+        }
+        ;
+    }
+
+    public void onReadLog(View view) {
         if(bluetooth_le_adapter.readCharacteristic(
                 BleAdapterService.BATTERY_SERVICE_SERVICE_UUID,
                 BleAdapterService.BATTERY_LEVEL_CHARACTERISTIC_UUID

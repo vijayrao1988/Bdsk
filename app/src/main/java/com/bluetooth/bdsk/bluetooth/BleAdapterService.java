@@ -67,6 +67,7 @@ public class BleAdapterService extends Service {
     public static final String POTS_SERVICE_SERVICE_UUID = "6E529F14-B56F-4B05-8465-A1CEE41BB141";
     public static final String TIME_POINT_SERVICE_SERVICE_UUID = "6E52214F-B56F-4B05-8465-A1CEE41BB141";
     public static final String VALVE_CONTROLLER_SERVICE_UUID = "6E52C714-B56F-4B05-8465-A1CEE41BB141";
+    public static final String LOG_SERVICE_UUID = "6E52ABCD-B56F-4B05-8465-A1CEE41BB141";
 
     //service characteristics
     public static String ALERT_LEVEL_CHARACTERISTIC = "00002A06-0000-1000-8000-00805F9B34FB";
@@ -76,6 +77,7 @@ public class BleAdapterService extends Service {
     public static final String POTS_CHARACTERISTIC_UUID = "6E52E386-B56F-4B05-8465-A1CEE41BB141";
     public static final String NEW_WATERING_TIME_POINT_CHARACTERISTIC_UUID = "6E529480-B56F-4B05-8465-A1CEE41BB141";
     public static final String COMMAND_CHARACTERISTIC_UUID = "6E52CFDB-B56F-4B05-8465-A1CEE41BB141";
+    public static final String LOG_CHARACTERISTIC_UUID = "6E521234-B56F-4B05-8465-A1CEE41BB141";
 
 
 

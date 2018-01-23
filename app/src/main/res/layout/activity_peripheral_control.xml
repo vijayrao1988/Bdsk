@@ -24,15 +24,6 @@
         android:layout_marginTop="15dp"
         android:text="name"/>
 
-    <TextView
-        android:id="@+id/rssiTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/nameTextView"
-        android:layout_centerHorizontal="true"
-        android:layout_margin="16dp"
-        android:text="RSSI"/>
-
     <LinearLayout
         android:id="@+id/rectangle"
         android:layout_width="200dp"
@@ -162,6 +153,16 @@
         android:text="Connect" />
 
     <Button
+        android:id="@+id/logButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/connectButton"
+        android:layout_below="@+id/flushClose"
+        android:enabled="false"
+        android:onClick="onReadLog"
+        android:text="Read Log" />
+
+    <Button
         android:id="@+id/pauseButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -176,9 +177,8 @@
         android:id="@+id/msgTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/pauseButton"
+        android:layout_above="@+id/potsButton"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"
         android:text="" />
 
     <Switch
