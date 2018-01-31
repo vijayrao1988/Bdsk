@@ -51,6 +51,7 @@ public class PeripheralControlActivity extends Activity {
     private boolean share_with_server = false;
     private Switch share_switch;
     private static volatile int CommListIndex = 0;
+    private static volatile int LogReadingIndex = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -233,13 +234,12 @@ public class PeripheralControlActivity extends Activity {
                     if(bundle.get(BleAdapterService.PARCEL_CHARACTERISTIC_UUID).toString().toUpperCase().equals(BleAdapterService.LOG_CHARACTERISTIC_UUID)) {
                         b = bundle.getByteArray(BleAdapterService.PARCEL_VALUE);
                         if(b.length > 0) {
-                            PeripheralControlActivity.this.setAlertLevel((int) b[0]);
-                            showMsg("Received " + b.toString() + "from Pebble.");
-                            showMsg("Log data = " + (int)b[0]);
+                            showMsg("Log data = " + (int) b[0] + (int) b[1] + (int) b[2] + (int) b[3]);
                         } else {
                             showMsg("Battery characteristic empty");
                         }
                     }
+
 
                     break;
 
@@ -269,6 +269,23 @@ public class PeripheralControlActivity extends Activity {
                             }
                         }
                     }
+                    if (bundle.get(BleAdapterService.PARCEL_CHARACTERISTIC_UUID).toString()
+                            .toUpperCase().equals(BleAdapterService.LOG_CHARACTERISTIC_UUID)) {
+                        b = bundle.getByteArray(BleAdapterService.PARCEL_VALUE);
+                        if (b.length > 0) {
+                            showMsg("Read characteristic : " + String.valueOf(LogReadingIndex));
+                            if(bluetooth_le_adapter.readCharacteristic(
+                                    BleAdapterService.LOG_SERVICE_UUID,
+                                    BleAdapterService.LOG_CHARACTERISTIC_UUID
+                            ) == TRUE) {
+                                showMsg("Log Event Read");
+
+                            } else {
+                                showMsg("Log Event Read Failed");
+                            }
+                        }
+                    }
+
                     break;
             }
         }
@@ -440,8 +457,8 @@ public class PeripheralControlActivity extends Activity {
         byte hours = (byte) calendar.get(Calendar.HOUR_OF_DAY);
         byte minutes = (byte) calendar.get(Calendar.MINUTE);
         byte seconds = (byte) calendar.get(Calendar.SECOND);
-        int duration = 555 + CommListIndex;
-        int volume = 555 - CommListIndex;
+        int duration = 555 + (100 * CommListIndex);
+        int volume = 5555 - (100 * CommListIndex);
         int iDurationMSB = (duration / 256);
         int iDurationLSB = (duration % 256);
         byte bDurationMSB = (byte) iDurationMSB;
@@ -468,20 +485,16 @@ public class PeripheralControlActivity extends Activity {
         } else {
             showMsg("Reading Battery Level failed");
         }
-        ;
     }
 
     public void onReadLog(View view) {
-        if(bluetooth_le_adapter.readCharacteristic(
-                BleAdapterService.BATTERY_SERVICE_SERVICE_UUID,
-                BleAdapterService.BATTERY_LEVEL_CHARACTERISTIC_UUID
-        ) == TRUE) {
-            showMsg("Battery Level Read");
-
-        } else {
-            showMsg("Reading Battery Level failed");
-        }
-        ;
+        byte readingIndex0 = (byte) 2;
+        byte readingIndex1 = (byte) 83;
+        byte[] readingIndex = {readingIndex0, readingIndex1};
+        bluetooth_le_adapter.writeCharacteristic(
+                BleAdapterService.LOG_SERVICE_UUID,
+                BleAdapterService.LOG_CHARACTERISTIC_UUID, readingIndex
+        );
     }
 
     public void onNoise(View view) {
