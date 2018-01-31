@@ -269,4 +269,16 @@ public class BleAdapterService extends Service {
 
         return bluetooth_gatt.writeCharacteristic(gattChar);
     }
+
+    public int convertByteToInt(byte byteData)
+    {
+        int intData;
+        if(byteData < 0) {
+            intData = 256 + byteData;
+            return intData;
+        }
+        else {
+            return (int) byteData;
+        }
+    }
 }

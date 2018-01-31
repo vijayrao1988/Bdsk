@@ -234,9 +234,13 @@ public class PeripheralControlActivity extends Activity {
                     if(bundle.get(BleAdapterService.PARCEL_CHARACTERISTIC_UUID).toString().toUpperCase().equals(BleAdapterService.LOG_CHARACTERISTIC_UUID)) {
                         b = bundle.getByteArray(BleAdapterService.PARCEL_VALUE);
                         if(b.length > 0) {
-                            showMsg("Log data = " + (int) b[0] + (int) b[1] + (int) b[2] + (int) b[3]);
+                            long date = ((16777216 * bluetooth_le_adapter.convertByteToInt(b[0])) + (65536 * bluetooth_le_adapter.convertByteToInt(b[1])) + (256 * bluetooth_le_adapter.convertByteToInt(b[2])) + bluetooth_le_adapter.convertByteToInt(b[3]));
+                            showMsg("date = " + date);
+                            Date eventDate = new Date(date * 1000);
+
+                            showMsg(eventDate.toString());
                         } else {
-                            showMsg("Battery characteristic empty");
+                            showMsg("No log data");
                         }
                     }
 
