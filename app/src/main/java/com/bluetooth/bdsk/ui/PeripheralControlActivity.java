@@ -236,7 +236,7 @@ public class PeripheralControlActivity extends Activity {
                         if(b.length > 0) {
                             long date = ((16777216 * bluetooth_le_adapter.convertByteToInt(b[0])) + (65536 * bluetooth_le_adapter.convertByteToInt(b[1])) + (256 * bluetooth_le_adapter.convertByteToInt(b[2])) + bluetooth_le_adapter.convertByteToInt(b[3]));
                             showMsg("date = " + date);
-                            Date eventDate = new Date(date * 1000);
+                            Date eventDate = new Date(date * 1000); //Arduino provides seconds since 1 Jan 1970. Android uses milliseconds since 1 Jan 1970. So, multiplying by 1000.
 
                             showMsg(eventDate.toString());
                         } else {
