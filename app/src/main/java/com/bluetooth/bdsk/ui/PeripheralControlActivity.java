@@ -163,40 +163,19 @@ public class PeripheralControlActivity extends Activity {
                 case BleAdapterService.GATT_SERVICES_DISCOVERED:
                     //validate services and if ok...
                     List<BluetoothGattService> slist = bluetooth_le_adapter.getSupportedGattServices();
-                    boolean time_point_service_present = false;
-                    boolean current_time_service_present = false;
-                    boolean pots_service_present = false;
-                    boolean battery_service_present = false;
-                    boolean valve_controller_service_present = false;
+                    boolean pebble_service_present = false;
 
                     for (BluetoothGattService svc : slist) {
                         Log.d(Constants.TAG, "UUID=" + svc.getUuid().toString().toUpperCase() + "INSTANCE=" + svc.getInstanceId());
                         String serviceUuid = svc.getUuid().toString().toUpperCase();
-                        if (svc.getUuid().toString().equalsIgnoreCase(BleAdapterService.TIME_POINT_SERVICE_SERVICE_UUID)) {
-                            time_point_service_present = true;
-                            continue;
-                        }
-                        if (svc.getUuid().toString().equalsIgnoreCase(BleAdapterService.CURRENT_TIME_SERVICE_SERVICE_UUID)) {
-                            current_time_service_present = true;
-                            continue;
-                        }
-                        if (svc.getUuid().toString().equalsIgnoreCase(BleAdapterService.POTS_SERVICE_SERVICE_UUID)) {
-                            pots_service_present = true;
-                            continue;
-                        }
-                        if (svc.getUuid().toString().equalsIgnoreCase(BleAdapterService.BATTERY_SERVICE_SERVICE_UUID)) {
-                            battery_service_present = true;
-                            continue;
-                        }
-                        if (svc.getUuid().toString().equalsIgnoreCase(BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID)) {
-                            valve_controller_service_present = true;
+                        if (svc.getUuid().toString().equalsIgnoreCase(BleAdapterService.PEBBLE_SERVICE_UUID)) {
+                            pebble_service_present = true;
                             continue;
                         }
                     }
 
-                    if (time_point_service_present && current_time_service_present && pots_service_present && battery_service_present) {
+                    if (pebble_service_present) {
                         showMsg("Device has expected services");
-
 
                         //enable the LOW/MID/HIGH alert level selection buttons
                         //((Button) PeripheralControlActivity.this.findViewById(R.id.lowButton)).setEnabled(true);
@@ -279,7 +258,7 @@ public class PeripheralControlActivity extends Activity {
                         if (b.length > 0) {
                             showMsg("Read characteristic : " + String.valueOf(LogReadingIndex));
                             if(bluetooth_le_adapter.readCharacteristic(
-                                    BleAdapterService.LOG_SERVICE_UUID,
+                                    BleAdapterService.PEBBLE_SERVICE_UUID,
                                     BleAdapterService.LOG_CHARACTERISTIC_UUID
                             ) == TRUE) {
                                 showMsg("Log Event Read");
@@ -345,8 +324,12 @@ public class PeripheralControlActivity extends Activity {
 
         byte[] currentTime = {hours, minutes, seconds, DATE, MONTH, bYEARMSB, bYEARLSB};
 
-        bluetooth_le_adapter.writeCharacteristic(
+        /*bluetooth_le_adapter.writeCharacteristic(
                 BleAdapterService.CURRENT_TIME_SERVICE_SERVICE_UUID,
+                BleAdapterService.CURRENT_TIME_CHARACTERISTIC_UUID, currentTime
+        );*/
+        bluetooth_le_adapter.writeCharacteristic(
+                BleAdapterService.PEBBLE_SERVICE_UUID,
                 BleAdapterService.CURRENT_TIME_CHARACTERISTIC_UUID, currentTime
         );
     }
@@ -354,48 +337,72 @@ public class PeripheralControlActivity extends Activity {
     public void onSetPots(View view) {
         byte numberOfPots = (byte) 5;
         byte[] pots = {numberOfPots};
-        bluetooth_le_adapter.writeCharacteristic(
+        /*bluetooth_le_adapter.writeCharacteristic(
                 BleAdapterService.POTS_SERVICE_SERVICE_UUID,
+                BleAdapterService.POTS_CHARACTERISTIC_UUID, pots
+        );*/
+        bluetooth_le_adapter.writeCharacteristic(
+                BleAdapterService.PEBBLE_SERVICE_UUID,
                 BleAdapterService.POTS_CHARACTERISTIC_UUID, pots
         );
     }
 
     public void onFlushOpen(View view) {
         byte[] valveCommand = {1};
-        bluetooth_le_adapter.writeCharacteristic(
+        /*bluetooth_le_adapter.writeCharacteristic(
                 BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID,
+                BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
+        );*/
+        bluetooth_le_adapter.writeCharacteristic(
+                BleAdapterService.PEBBLE_SERVICE_UUID,
                 BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
         );
     }
 
     public void onFlushClose(View view) {
         byte[] valveCommand = {5};
-        bluetooth_le_adapter.writeCharacteristic(
+        /*bluetooth_le_adapter.writeCharacteristic(
                 BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID,
+                BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
+        );*/
+        bluetooth_le_adapter.writeCharacteristic(
+                BleAdapterService.PEBBLE_SERVICE_UUID,
                 BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
         );
     }
 
     public void onStart(View view) {
         byte[] valveCommand = {2};
-        bluetooth_le_adapter.writeCharacteristic(
+        /*bluetooth_le_adapter.writeCharacteristic(
                 BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID,
+                BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
+        );*/
+        bluetooth_le_adapter.writeCharacteristic(
+                BleAdapterService.PEBBLE_SERVICE_UUID,
                 BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
         );
     }
 
     public void onStop(View view) {
         byte[] valveCommand = {3};
-        bluetooth_le_adapter.writeCharacteristic(
+        /*bluetooth_le_adapter.writeCharacteristic(
                 BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID,
+                BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
+        );*/
+        bluetooth_le_adapter.writeCharacteristic(
+                BleAdapterService.PEBBLE_SERVICE_UUID,
                 BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
         );
     }
 
     public void onPause(View view) {
         byte[] valveCommand = {4};
-        bluetooth_le_adapter.writeCharacteristic(
+        /*bluetooth_le_adapter.writeCharacteristic(
                 BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID,
+                BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
+        );*/
+        bluetooth_le_adapter.writeCharacteristic(
+                BleAdapterService.PEBBLE_SERVICE_UUID,
                 BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
         );
     }
@@ -435,8 +442,12 @@ public class PeripheralControlActivity extends Activity {
         byte bVolumeLSB = (byte) iVolumeLSB;
 
         byte[] timePoint = {index, dayOfTheWeek, hours, minutes, seconds, bDurationMSB, bDurationLSB, bVolumeMSB, bVolumeLSB};
-        bluetooth_le_adapter.writeCharacteristic(
+        /*bluetooth_le_adapter.writeCharacteristic(
                 BleAdapterService.TIME_POINT_SERVICE_SERVICE_UUID,
+                BleAdapterService.NEW_WATERING_TIME_POINT_CHARACTERISTIC_UUID, timePoint
+        );*/
+        bluetooth_le_adapter.writeCharacteristic(
+                BleAdapterService.PEBBLE_SERVICE_UUID,
                 BleAdapterService.NEW_WATERING_TIME_POINT_CHARACTERISTIC_UUID, timePoint
         );
     }
@@ -473,15 +484,20 @@ public class PeripheralControlActivity extends Activity {
         byte bVolumeLSB = (byte) iVolumeLSB;
 
         byte[] timePoint = {index, dayOfTheWeek, hours, minutes, seconds, bDurationMSB, bDurationLSB, bVolumeMSB, bVolumeLSB};
-        bluetooth_le_adapter.writeCharacteristic(
+        /*bluetooth_le_adapter.writeCharacteristic(
                 BleAdapterService.TIME_POINT_SERVICE_SERVICE_UUID,
+                BleAdapterService.NEW_WATERING_TIME_POINT_CHARACTERISTIC_UUID, timePoint
+        );*/
+        bluetooth_le_adapter.writeCharacteristic(
+                BleAdapterService.PEBBLE_SERVICE_UUID,
                 BleAdapterService.NEW_WATERING_TIME_POINT_CHARACTERISTIC_UUID, timePoint
         );
     }
 
     public void onBattery(View view) {
         if(bluetooth_le_adapter.readCharacteristic(
-                BleAdapterService.BATTERY_SERVICE_SERVICE_UUID,
+                //BleAdapterService.BATTERY_SERVICE_SERVICE_UUID,
+                BleAdapterService.PEBBLE_SERVICE_UUID,
                 BleAdapterService.BATTERY_LEVEL_CHARACTERISTIC_UUID
         ) == TRUE) {
             showMsg("Battery Level Read");
@@ -496,7 +512,7 @@ public class PeripheralControlActivity extends Activity {
         byte readingIndex1 = (byte) 83;
         byte[] readingIndex = {readingIndex0, readingIndex1};
         bluetooth_le_adapter.writeCharacteristic(
-                BleAdapterService.LOG_SERVICE_UUID,
+                BleAdapterService.PEBBLE_SERVICE_UUID,
                 BleAdapterService.LOG_CHARACTERISTIC_UUID, readingIndex
         );
     }

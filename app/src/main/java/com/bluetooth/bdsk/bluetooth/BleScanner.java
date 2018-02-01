@@ -75,6 +75,7 @@ public class BleScanner {
 
         ScanSettings settings = new ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build();
         setScanning(true);
+
         scanner.startScan(filters, settings, scan_callback);
     }
 

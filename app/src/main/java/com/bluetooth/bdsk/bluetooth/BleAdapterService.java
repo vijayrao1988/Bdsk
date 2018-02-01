@@ -23,6 +23,7 @@ import android.util.Log;
 
 import com.bluetooth.bdsk.Constants;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
 
@@ -68,6 +69,7 @@ public class BleAdapterService extends Service {
     public static final String TIME_POINT_SERVICE_SERVICE_UUID = "6E52214F-B56F-4B05-8465-A1CEE41BB141";
     public static final String VALVE_CONTROLLER_SERVICE_UUID = "6E52C714-B56F-4B05-8465-A1CEE41BB141";
     public static final String LOG_SERVICE_UUID = "6E52ABCD-B56F-4B05-8465-A1CEE41BB141";
+    public static final String PEBBLE_SERVICE_UUID = "12345678-1234-1234-1234-123456789ABC";
 
     //service characteristics
     public static String ALERT_LEVEL_CHARACTERISTIC = "00002A06-0000-1000-8000-00805F9B34FB";
@@ -137,6 +139,7 @@ public class BleAdapterService extends Service {
             return false;
         }
         bluetooth_gatt = device.connectGatt(this, false, gatt_callback);
+        refreshDeviceCache(bluetooth_gatt);
         return true;
     }
 
@@ -280,5 +283,21 @@ public class BleAdapterService extends Service {
         else {
             return (int) byteData;
         }
+    }
+
+    private boolean refreshDeviceCache(BluetoothGatt gatt){
+        Log.d(Constants.TAG, "Refreshing device cache");
+        try {
+            BluetoothGatt localBluetoothGatt = gatt;
+            Method localMethod = localBluetoothGatt.getClass().getMethod("refresh", new Class[0]);
+            if (localMethod != null) {
+                boolean bool = ((Boolean) localMethod.invoke(localBluetoothGatt, new Object[0])).booleanValue();
+                return bool;
+            }
+        }
+        catch (Exception localException) {
+            Log.d(Constants.TAG, "An exception occured while refreshing device");
+        }
+        return false;
     }
 }
