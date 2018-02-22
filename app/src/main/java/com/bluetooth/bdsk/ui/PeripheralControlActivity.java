@@ -4,16 +4,22 @@ package com.bluetooth.bdsk.ui;
  * Created by blitz on 11/07/17.
  */
 
+import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothGattService;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -21,11 +27,17 @@ import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bluetooth.bdsk.Constants;
 import com.bluetooth.bdsk.R;
 import com.bluetooth.bdsk.bluetooth.BleAdapterService;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -34,6 +46,7 @@ import java.util.SimpleTimeZone;
 import java.util.TimeZone;
 import java.util.Timer;
 
+import static com.bluetooth.bdsk.Constants.TAG;
 import static java.lang.Boolean.TRUE;
 
 public class PeripheralControlActivity extends Activity {
@@ -52,6 +65,8 @@ public class PeripheralControlActivity extends Activity {
     private Switch share_switch;
     private static volatile int CommListIndex = 0;
     private static volatile int LogReadingIndex = 0;
+    private File logFile;
+    private FileOutputStream logOutputHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,7 +105,7 @@ public class PeripheralControlActivity extends Activity {
     }
 
     private void showMsg(final String msg) {
-        Log.d(Constants.TAG, msg);
+        Log.d(TAG, msg);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -166,7 +181,7 @@ public class PeripheralControlActivity extends Activity {
                     boolean pebble_service_present = false;
 
                     for (BluetoothGattService svc : slist) {
-                        Log.d(Constants.TAG, "UUID=" + svc.getUuid().toString().toUpperCase() + "INSTANCE=" + svc.getInstanceId());
+                        Log.d(TAG, "UUID=" + svc.getUuid().toString().toUpperCase() + "INSTANCE=" + svc.getInstanceId());
                         String serviceUuid = svc.getUuid().toString().toUpperCase();
                         if (svc.getUuid().toString().equalsIgnoreCase(BleAdapterService.PEBBLE_SERVICE_UUID)) {
                             pebble_service_present = true;
@@ -199,7 +214,7 @@ public class PeripheralControlActivity extends Activity {
 
                 case BleAdapterService.GATT_CHARACTERISTIC_READ:
                     bundle = msg.getData();
-                    Log.d(Constants.TAG, "Service=" + bundle.get(BleAdapterService.PARCEL_SERVICE_UUID).toString().toUpperCase() + " Characteristic=" + bundle.get(BleAdapterService.PARCEL_CHARACTERISTIC_UUID).toString().toUpperCase());
+                    Log.d(TAG, "Service=" + bundle.get(BleAdapterService.PARCEL_SERVICE_UUID).toString().toUpperCase() + " Characteristic=" + bundle.get(BleAdapterService.PARCEL_CHARACTERISTIC_UUID).toString().toUpperCase());
                     if(bundle.get(BleAdapterService.PARCEL_CHARACTERISTIC_UUID).toString().toUpperCase().equals(BleAdapterService.BATTERY_LEVEL_CHARACTERISTIC_UUID)) {
                         b = bundle.getByteArray(BleAdapterService.PARCEL_VALUE);
                         if(b.length > 0) {
@@ -212,12 +227,102 @@ public class PeripheralControlActivity extends Activity {
                     }
                     if(bundle.get(BleAdapterService.PARCEL_CHARACTERISTIC_UUID).toString().toUpperCase().equals(BleAdapterService.LOG_CHARACTERISTIC_UUID)) {
                         b = bundle.getByteArray(BleAdapterService.PARCEL_VALUE);
+                        String str = "",eventData = "";
                         if(b.length > 0) {
-                            long date = ((16777216 * bluetooth_le_adapter.convertByteToInt(b[0])) + (65536 * bluetooth_le_adapter.convertByteToInt(b[1])) + (256 * bluetooth_le_adapter.convertByteToInt(b[2])) + bluetooth_le_adapter.convertByteToInt(b[3]));
-                            showMsg("date = " + date);
-                            Date eventDate = new Date(date * 1000); //Arduino provides seconds since 1 Jan 1970. Android uses milliseconds since 1 Jan 1970. So, multiplying by 1000.
+                            if (b[0]!= 0) {
 
-                            showMsg(eventDate.toString());
+                                int volume=0;
+                                int duration=0;
+                                long date = ((16777216 * bluetooth_le_adapter.convertByteToInt(b[1])) + (65536 * bluetooth_le_adapter.convertByteToInt(b[2])) + (256 * bluetooth_le_adapter.convertByteToInt(b[3])) + bluetooth_le_adapter.convertByteToInt(b[4]));
+                                showMsg("date = " + date);
+                                //Date eventDate = new Date(date * 1000); //Arduino provides seconds since 1 Jan 1970. Android uses milliseconds since 1 Jan 1970. So, multiplying by 1000.
+                                String dateString = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new Date(date * 1000));
+
+                                byte[] bytes = {b[5], b[6], b[7], b[8], b[9], b[10]};
+
+
+                                StringBuilder sb = new StringBuilder();
+                                for (byte data : bytes) {
+                                    sb.append(String.format("%02X", data));
+                                }
+                                    //byte[] bytes = {b[5], b[6], b[7], b[8], b[9], b[10], b[11], b[12], b[13], b[14]};
+
+                                    /*try {
+                                        str = new String(bytes, "UTF-8");  // Best way to decode using "UTF-8"
+                                    } catch (UnsupportedEncodingException e) {
+                                        e.printStackTrace();
+                                    }*/
+                                //}
+                                switch(b[0])
+                                {
+                                    case 1 :    str = "Device connected MAC=";
+                                                eventData = sb.toString();
+                                                break;
+
+                                    case 2 :    str = "Device disconnected MAC=";
+                                                eventData = sb.toString();
+                                                break;
+
+                                    case 17 :   str = "Valve open";
+                                                duration = (256 * bluetooth_le_adapter.convertByteToInt(b[11])) + bluetooth_le_adapter.convertByteToInt(b[12]);
+                                                volume = (256 * bluetooth_le_adapter.convertByteToInt(b[13])) + bluetooth_le_adapter.convertByteToInt(b[14]);
+                                                eventData = "Volume = "+volume+" "+"Duration = "+duration;
+                                                break;
+
+                                    case 18 :   str = "Valve close";
+                                                volume = (256 * bluetooth_le_adapter.convertByteToInt(b[13])) + bluetooth_le_adapter.convertByteToInt(b[14]);
+                                                eventData = "Counter value = "+volume;
+                                                break;
+
+                                    case 20 :   str = "Old timepoints erased";
+                                                eventData = "";
+                                                break;
+
+                                    case 21 :   str = "New session time point:";
+                                                String[] dayOfWeek ={"Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"};
+                                                eventData = (dayOfWeek[b[7]-1]+" "+bluetooth_le_adapter.convertByteToInt(b[8])+":"+bluetooth_le_adapter.convertByteToInt(b[9])+":"+bluetooth_le_adapter.convertByteToInt(b[10]));
+                                                break;
+
+                                    case 81 :   str = "Flush open";
+                                                break;
+
+                                    case 82 :   str = "Flush close";
+                                                volume = (256 * bluetooth_le_adapter.convertByteToInt(b[13])) + bluetooth_le_adapter.convertByteToInt(b[14]);
+                                                eventData = "Counter value = "+volume;
+                                                break;
+
+                                    case 97 :   str =  "Pebble Start";
+                                                break;
+
+                                    case 98 :   str = "Pebble Stop";
+                                                break;
+
+                                    case 99 :   str = "Pebble pause";
+                                                break;
+
+                                    case 113 :  str = "No. of pots";
+                                                duration = (256 * bluetooth_le_adapter.convertByteToInt(b[11])) + bluetooth_le_adapter.convertByteToInt(b[12]);
+                                                eventData = ": "+duration;
+                                                break;
+                                }
+                                //showMsg("Event code=" + Integer.toHexString(b[0]) + " " + dateString + ", " + sb.toString() + ","+ volume + ","+ duration);
+                                        showMsg(dateString + " " +"Event="+Integer.toHexString(b[0])+" "+str +" "+eventData);
+
+                                if (createLogFile()) {
+                                    try {
+
+                                        //logOutputHandler.write(("Event code=" + Integer.toHexString(b[0]) + ", " + dateString +" "+ sb.toString()+ ", "+ volume + ", "+ duration+ "\n").getBytes());
+                                        logOutputHandler.write((dateString + " "+"Event="+Integer.toHexString(b[0])+" "+str +" "+eventData+ "\n").getBytes());
+                                        logOutputHandler.close();
+
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                    onReadLogDynamic();
+                                }
+                                //writeToFile("Event code="+Integer.toHexString(b[0])+" "+eventDate.toString());
+                            }
+
                         } else {
                             showMsg("No log data");
                         }
@@ -241,7 +346,7 @@ public class PeripheralControlActivity extends Activity {
                         b = bundle.getByteArray(BleAdapterService.PARCEL_VALUE);
                         if (b.length > 0) {
                             showMsg("Received ack");
-                            CommListIndex++;
+                          /* CommListIndex++;
                             if(CommListIndex < 28) {
                                 onSendTPDynamic();
                             }
@@ -249,7 +354,8 @@ public class PeripheralControlActivity extends Activity {
                             {
                                 CommListIndex = 0;
 
-                            }
+                            }*/
+
                         }
                     }
                     if (bundle.get(BleAdapterService.PARCEL_CHARACTERISTIC_UUID).toString()
@@ -262,6 +368,7 @@ public class PeripheralControlActivity extends Activity {
                                     BleAdapterService.LOG_CHARACTERISTIC_UUID
                             ) == TRUE) {
                                 showMsg("Log Event Read");
+                                LogReadingIndex++;
 
                             } else {
                                 showMsg("Log Event Read Failed");
@@ -422,7 +529,7 @@ public class PeripheralControlActivity extends Activity {
         calendar.add(Calendar.MINUTE, 2);
 
         //Set present time as data packet
-        byte index = (byte) CommListIndex;
+        byte index = (byte) 9;
         byte dayOfTheWeek = (byte) calendar.get(Calendar.DAY_OF_WEEK);
         byte hours = (byte) calendar.get(Calendar.HOUR);
         if(calendar.get(Calendar.AM_PM) == 1)
@@ -430,8 +537,8 @@ public class PeripheralControlActivity extends Activity {
         else {hours = (byte) (calendar.get(Calendar.HOUR));}
         byte minutes = (byte) calendar.get(Calendar.MINUTE);
         byte seconds = (byte) calendar.get(Calendar.SECOND);
-        int duration = 555;
-        int volume = 555;
+        int duration = 2;
+        int volume = 5000;
         int iDurationMSB = (duration / 256);
         int iDurationLSB = (duration % 256);
         byte bDurationMSB = (byte) iDurationMSB;
@@ -472,7 +579,7 @@ public class PeripheralControlActivity extends Activity {
         byte hours = (byte) calendar.get(Calendar.HOUR_OF_DAY);
         byte minutes = (byte) calendar.get(Calendar.MINUTE);
         byte seconds = (byte) calendar.get(Calendar.SECOND);
-        int duration = 555 + (100 * CommListIndex);
+        int duration = 2;//555 + (100 * CommListIndex);
         int volume = 5555 - (100 * CommListIndex);
         int iDurationMSB = (duration / 256);
         int iDurationLSB = (duration % 256);
@@ -507,9 +614,25 @@ public class PeripheralControlActivity extends Activity {
         }
     }
 
-    public void onReadLog(View view) {
-        byte readingIndex0 = (byte) 2;
-        byte readingIndex1 = (byte) 83;
+    public void onReadLog(View view)
+    {
+        int iLogReadingIndexMSB = LogReadingIndex / 256;
+        int iLogReadingIndexLSB = LogReadingIndex % 256;
+        byte readingIndex0 = (byte) iLogReadingIndexMSB;
+        byte readingIndex1 = (byte) iLogReadingIndexLSB;
+        byte[] readingIndex = {readingIndex0, readingIndex1};
+        bluetooth_le_adapter.writeCharacteristic(
+                BleAdapterService.PEBBLE_SERVICE_UUID,
+                BleAdapterService.LOG_CHARACTERISTIC_UUID, readingIndex
+        );
+    }
+
+    public void onReadLogDynamic()
+    {
+        int iLogReadingIndexMSB = LogReadingIndex / 256;
+        int iLogReadingIndexLSB = LogReadingIndex % 256;
+        byte readingIndex0 = (byte) iLogReadingIndexMSB;
+        byte readingIndex1 = (byte) iLogReadingIndexLSB;
         byte[] readingIndex = {readingIndex0, readingIndex1};
         bluetooth_le_adapter.writeCharacteristic(
                 BleAdapterService.PEBBLE_SERVICE_UUID,
@@ -536,7 +659,7 @@ public class PeripheralControlActivity extends Activity {
     }
 
     public void onBackPressed() {
-        Log.d(Constants.TAG, "onBackPressed");
+        Log.d(TAG, "onBackPressed");
         back_requested = true;
         if (bluetooth_le_adapter.isConnected()) {
             try {
@@ -573,4 +696,77 @@ public class PeripheralControlActivity extends Activity {
         }
     }
 
+    //******************************Create Log data text logFile for received data from Arduino**********************************
+    boolean createLogFile() {
+        //Toast.makeText(getBaseContext(), "inside create", Toast.LENGTH_SHORT).show();
+        if(!(isExternalStorageWritable()&&isStoragePermissionGranted()))
+            return false;	// Check if the external storage is available for write
+        else {
+            String dirPath = Environment.getExternalStorageDirectory().getPath()+"/Logger/";
+        //String dirPath = getFilesDir().getAbsolutePath()+"/Logger/";
+            File directory = new File(dirPath);
+            logFile =new File(dirPath+"/LogData.txt");
+
+            if(!(logFile.exists()))
+            {
+                try {
+                    if (!(directory.exists() && directory.isDirectory())) {    //If the Directory does not exist: create a new one
+                        if (directory.mkdir()) {
+                            System.out.println("Directory created");
+                        } else {
+                            System.out.println("Directory is not created");
+                        }
+                    }
+                    logOutputHandler = new FileOutputStream(logFile);    //// Create File for time
+                    //logOutputHandler.write(("\n").getBytes());
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            else {
+                try{
+                    logOutputHandler = new FileOutputStream(logFile, true);
+                    // logOutputHandler.write(("\n\n").getBytes());
+                }
+                catch(IOException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+
+       }
+        return true;
+    }
+
+    /* Checks if external storage is available for read and write */
+    public boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        //Toast.makeText(getBaseContext(),state, Toast.LENGTH_SHORT).show();
+        //showMsg(state);
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        return false;
+    }
+
+    public  boolean isStoragePermissionGranted() {
+        if (Build.VERSION.SDK_INT >= 23)
+        {
+            if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG,"Permission is granted");
+                return true;
+            } else {
+
+                Log.v(TAG,"Permission is revoked");
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                return false;
+            }
+        }
+        else { //permission is automatically granted on sdk<23 upon installation
+            Log.v(TAG,"Permission is granted");
+            return true;
+        }
+    }
 }
