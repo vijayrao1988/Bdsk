@@ -58,7 +58,7 @@ public class BleScanner {
             @Override
             public void run() {
                 if (scanning) {
-                    Log.d(Constants.TAG, "Stopping scanning");
+                    Log.d(Constants.TAG, "Scan stopped");
                     scanner.stopScan(scan_callback);
                     setScanning(false);
                 }
@@ -73,7 +73,15 @@ public class BleScanner {
         //ScanFilter filter = new ScanFilter.Builder().setDeviceName("Pebble").build();
         //filters.add(filter);
 
-        ScanSettings settings = new ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build();
+        ScanSettings settings = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            settings = new ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                    .setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE)
+                    .setNumOfMatches(ScanSettings.MATCH_NUM_ONE_ADVERTISEMENT)
+                    .setReportDelay(0)
+                    .setPhy(ScanSettings.PHY_LE_ALL_SUPPORTED)
+                    .build();
+        }
         setScanning(true);
 
         scanner.startScan(filters, settings, scan_callback);
@@ -81,7 +89,7 @@ public class BleScanner {
 
     public void stopScanning() {
         setScanning(false);
-        Log.d(Constants.TAG, "Stopping scanning");
+        Log.d(Constants.TAG, "Scan stopped");
         scanner.stopScan(scan_callback);
     }
 
@@ -90,7 +98,7 @@ public class BleScanner {
             if (!scanning) {
                 return;
             }
-            scan_results_consumer.candidateBleDevice(result.getDevice(), result.getScanRecord().getBytes(), result.getRssi());
+            scan_results_consumer.candidateBleDevice(result, result.getRssi());
         }
     };
 
@@ -103,8 +111,8 @@ public class BleScanner {
         if (!scanning) {
             scan_results_consumer.scanningStopped();
         } else {
+            scan_results_consumer.scanningStarted();
         }
-        scan_results_consumer.scanningStarted();
     }
 
 

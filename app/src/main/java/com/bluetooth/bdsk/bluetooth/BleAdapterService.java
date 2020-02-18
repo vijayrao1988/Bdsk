@@ -296,7 +296,7 @@ public class BleAdapterService extends Service {
             }
         }
         catch (Exception localException) {
-            Log.d(Constants.TAG, "An exception occured while refreshing device");
+            Log.d(Constants.TAG, "An exception occurred while refreshing device");
         }
         return false;
     }

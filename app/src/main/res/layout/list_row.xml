@@ -19,4 +19,44 @@
         android:textSize="12dp"
         android:textColor="#0040FF"
         android:text="" />
+    <TextView
+        android:id="@+id/bluvisionSerialNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="10dp"
+        android:textSize="12dp"
+        android:textColor="#0040FF"
+        android:text="" />
+    <TextView
+        android:id="@+id/bluvisionBattery"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="10dp"
+        android:textSize="12dp"
+        android:textColor="#0040FF"
+        android:text="" />
+    <TextView
+        android:id="@+id/bluvisionRssi"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="10dp"
+        android:textSize="12dp"
+        android:textColor="#0040FF"
+        android:text="" />
+    <TextView
+        android:id="@+id/bluvisionTemperature"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="10dp"
+        android:textSize="12dp"
+        android:textColor="#0040FF"
+        android:text="" />
+    <TextView
+        android:id="@+id/bluvisionDeviceTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="10dp"
+        android:textSize="12dp"
+        android:textColor="#0040FF"
+        android:text="" />
 </LinearLayout>

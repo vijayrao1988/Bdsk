@@ -2,8 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Bdsk.iml" filepath="$PROJECT_DIR$/Bdsk.iml" />
+      <module fileurl="file://$PROJECT_DIR$/BluVision.iml" filepath="$PROJECT_DIR$/BluVision.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/bluvision.2.0.4/bluvision.2.0.4.iml" filepath="$PROJECT_DIR$/bluvision.2.0.4/bluvision.2.0.4.iml" />
     </modules>
   </component>
 </project>
